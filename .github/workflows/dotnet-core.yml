@@ -24,6 +24,6 @@ jobs:
     - name: Publish NuGet
       uses: brandedoutcast/publish-nuget@v2.5.5
       with:
-        PROJECT_FILE_PATH: src/Somfy.Net
+        PROJECT_FILE_PATH: src/Somfy.Net/Somfy.Net.csproj
         PACKAGE_NAME: Somfy.Net
         NUGET_KEY: ${{secrets.NUGET_API_KEY}}
