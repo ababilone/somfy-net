@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Somfy.Net.Contracts.Devices
@@ -19,11 +20,6 @@ namespace Somfy.Net.Contracts.Devices
     public DeviceState[] States { get; set; }
     public DeviceCapability[] Capabilities { get; set; }
 
-    protected T GetState<T>(string name)
-    {
-      if (States.FirstOrDefault(state => state.Name == name)?.Value is T t)
-        return t;
-      return default;
-    }
+    protected JsonElement GetStateValue(string name) => States.FirstOrDefault(state => state.Name == name)?.Value ?? default;
   }
 }
