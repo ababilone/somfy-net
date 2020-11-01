@@ -20,14 +20,14 @@ namespace Somfy.Net
         if (!DeviceType.IsAssignableFrom(type))
           continue;
 
-        var deviceTypeAttribute = DeviceType.GetCustomAttribute<DeviceTypeAttribute>();
+        var deviceTypeAttribute = type.GetCustomAttribute<DeviceTypeAttribute>();
         if (deviceTypeAttribute != null)
           mapping.Add(deviceTypeAttribute.Type, type);
       }
       return mapping;
     }
 
-    public override bool CanConvert(Type typeToConvert) => typeof(Device).IsAssignableFrom(typeToConvert);
+    public override bool CanConvert(Type typeToConvert) => typeof(Device) == typeToConvert;
 
     public override Device Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -38,11 +38,15 @@ namespace Somfy.Net
 
       using var jsonDocument = JsonDocument.ParseValue(ref reader);
       var jsonObject = jsonDocument.RootElement;
+      
+      if (jsonObject.TryGetProperty("type", out var typeElement))
+      {
+        var typeName = typeElement.GetString();
+        if (TypeMapping.TryGetValue(typeName, out var type))
+          return JsonSerializer.Deserialize(ref readerAtStart, type, options) as Device;
+      }
 
-      var typeName = jsonObject.GetProperty("type").GetString();
-      var type = TypeMapping.TryGetValue(typeName, out var t) ? t : typeof(Device);
-
-      return JsonSerializer.Deserialize(ref readerAtStart, type, options) as Device;
+      return null;
     }
 
     public override void Write(Utf8JsonWriter writer, Device value, JsonSerializerOptions options) => JsonSerializer.Serialize(writer, value, value.GetType(), options);
